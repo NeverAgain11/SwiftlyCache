@@ -1,0 +1,23 @@
+PODS:
+  - CleanJSON (1.0.7)
+  - SwiftlyKeyValueStorage (1.1.8):
+    - CleanJSON
+
+DEPENDENCIES:
+  - SwiftlyKeyValueStorage (from `..`)
+
+SPEC REPOS:
+  trunk:
+    - CleanJSON
+
+EXTERNAL SOURCES:
+  SwiftlyKeyValueStorage:
+    :path: ".."
+
+SPEC CHECKSUMS:
+  CleanJSON: a6ca52c0f20645e67f6748e9d2630ea36af2643d
+  SwiftlyKeyValueStorage: 9079641037851c53e3c2c1ac39e1c8969be60be0
+
+PODFILE CHECKSUM: 31714e0561a8e8c8648f557493441983a0476610
+
+COCOAPODS: 1.10.0

@@ -8,63 +8,63 @@
 
 import Foundation
 
-class LinkedNode<Value:Codable>:Equatable{
+class LinkedNode<Value:Codable>: Equatable {
     static func == (lhs: LinkedNode<Value>, rhs: LinkedNode<Value>) -> Bool {
         return lhs.key == rhs.key
     }
-    var key:String
-    var object:Value
-    var cost:vm_size_t
-    weak var prev:LinkedNode?
-    weak var next:LinkedNode?
-    
-    init(key:String,object:Value,cost:vm_size_t) {
+    var key: String
+    var object: Value
+    var cost: vm_size_t
+    weak var prev: LinkedNode?
+    weak var next: LinkedNode?
+
+    init(key: String, object: Value, cost: vm_size_t) {
         self.key = key
         self.object = object
         self.cost = cost
     }
 }
 
-class MemoryStorage<Value:Codable>{
-    var head:LinkedNode<Value>?
-    var tail:LinkedNode<Value>?
-    var totalCostLimit:vm_size_t = 0
-    var totalCountLimit:vm_size_t = 0
-    var dic = [String:LinkedNode<Value>]()
-    typealias Element = (String,Value)
-    var currentNode:LinkedNode<Value>?
-    
+class MemoryStorage<Value: Codable> {
+    var head: LinkedNode<Value>?
+    var tail: LinkedNode<Value>?
+    var totalCostLimit: vm_size_t = 0
+    var totalCountLimit: vm_size_t = 0
+    var dic = [String: LinkedNode<Value>]()
+    typealias Element = (String, Value)
+    var currentNode: LinkedNode<Value>?
+
     /**
      插入数据
      @param node:缓存对象
      */
-    func insertNodeAtHead(node:LinkedNode<Value>){
+    func insertNodeAtHead(node: LinkedNode<Value>) {
         totalCostLimit+=node.cost
         totalCountLimit+=1
-        if head == nil{
+        if head == nil {
             head = node
             tail = head
-        }else{
+        } else {
             node.next = head
             head?.prev = node
             head = node
-            
+
         }
     }
-    
+
     /**
      移除最后的节点
      */
     @discardableResult
-    func removeTailNode()->Bool{
-        if tail == nil{
+    func removeTailNode() -> Bool {
+        if tail == nil {
             head = tail
             totalCostLimit = 0
             totalCountLimit = 0
             return false
-        }else{
-            if let currentKey = tail?.key{
-                if let node = dic.removeValue(forKey: currentKey){
+        } else {
+            if let currentKey = tail?.key {
+                if let node = dic.removeValue(forKey: currentKey) {
                     tail?.prev?.next = nil
                     tail = tail?.prev
                     node.prev = nil
@@ -77,20 +77,20 @@ class MemoryStorage<Value:Codable>{
         }
         return false
     }
-    
+
     /**
      移动节点
      */
-    func moveNode(node:LinkedNode<Value>){
-        if head == node{ return }
-        if tail == node{
+    func moveNode(node: LinkedNode<Value>) {
+        if head == node { return }
+        if tail == node {
             //在链表尾部
             node.prev?.next = nil
             tail = node.prev
             node.next = head
             head?.prev = node
             head = node
-        }else{
+        } else {
             //在链表中间
             node.prev?.next = node.next
             node.next?.prev = node.prev
@@ -99,11 +99,10 @@ class MemoryStorage<Value:Codable>{
             head = node
         }
     }
-    
-    
-    func removeObject(node:LinkedNode<Value>){
-        guard head != nil else{ return }
-        if node.prev != nil && node.next != nil{
+
+    func removeObject(node: LinkedNode<Value>) {
+        guard head != nil else { return }
+        if node.prev != nil && node.next != nil {
             node.prev?.next = node.next
             node.next?.prev = node.prev
             totalCostLimit -= node.cost
@@ -111,34 +110,33 @@ class MemoryStorage<Value:Codable>{
             node.prev = nil
             node.next = nil
             dic.removeValue(forKey: node.key)
-        }else if node.prev == nil{
+        } else if node.prev == nil {
             head = node.next
             node.next = nil
             node.prev = nil
             head?.prev = nil
             dic.removeValue(forKey: node.key)
-        }else if node.next == nil{
+        } else if node.next == nil {
             removeTailNode()
         }
     }
-    
-    func removeAllObject(){
+
+    func removeAllObject() {
         totalCountLimit = 0
         totalCostLimit = 0
         head = nil
         tail = nil
         currentNode = nil
-        if dic.count>0{ self.dic.removeAll(keepingCapacity: true) }
+        if dic.count>0 { self.dic.removeAll(keepingCapacity: true) }
     }
-    
-    func setCurrentNode(){
+
+    func setCurrentNode() {
         currentNode = head
     }
-    
-   func next()->LinkedNode<Value>?{
+
+   func next()->LinkedNode<Value>? {
         let node = currentNode
         currentNode = currentNode?.next
         return node
     }
 }
-

@@ -7,20 +7,20 @@
 //
 
 import UIKit
-import SwiftlyCache
+import SwiftlyKeyValueStorage
 
-struct Student:Codable {
-    var name:String
-    var age:Int
-    
-    init(name:String,age:Int) {
+struct Student: Codable {
+    var name: String
+    var age: Int
+
+    init(name: String, age: Int) {
         self.name = name
         self.age = age
     }
 }
 
 class ViewController: UIViewController {
-    let cache = MultiCache<Student>()
+    let cache = SKStorage<Student>()
     let memoryCache = MemoryCache<Student>()
     let diskCache = DiskCache<Student>(path: NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0] + "SwiftlyDiskCache")
 
@@ -56,31 +56,45 @@ class ViewController: UIViewController {
         diskCacheSetObjectTest()
         diskCacheGetObjectTest()
         */
+        test()
+    }
+    
+    func test() {
+        let key = "asd"
+        if let student = cache.object(forKey: key) {
+            print(student)
+        }
+        else {
+            let stu = Student(name: "jack", age: 19)
+            cache.set(object: stu, forKey: key)
+        }
+        
+        print(cache.object(forKey: key) ?? "no stu")
     }
     /**
     MultiCache测试用例
     */
-        
-    func multiCacheGenerator(){
+/*
+    func multiCacheGenerator() {
         let flatMapResult = cache.compactMap { $0 }
         print("flatMapResult:\(flatMapResult)")
-        
-        let filterResult = cache.filter { (key,object) -> Bool in
+
+        let filterResult = cache.filter { (key, _) -> Bool in
             return key == "shirley2"
         }
         print(filterResult)
-                
+
         cache.forEach { print($0)}
-                
+
         let values = cache.map { return $0 }
         print(values)
 
-        for (key,object) in cache {
+        for (key, object) in cache {
             print("key1:\(key),object1:\(object)")
         }
     }
-        
-    func setObjectTest(){
+
+    func setObjectTest() {
         let shirley = Student(name: "shirley", age: 30)
         /**
         返回值也可以不需要
@@ -93,7 +107,7 @@ class ViewController: UIViewController {
         当所有缓存对象总大小超出totalCostLimit，会丢弃掉一些缓存数据
         **/
         cache.set(forKey: "shirley1", value: shirley, cost: 5)
-            
+
         /**
         异步调用set
         */
@@ -107,85 +121,85 @@ class ViewController: UIViewController {
             print("当前缓存对象对应的key:\(key),当前数据缓存是否成功(fin为Bool类型):\(fin)")
         }
     }
-    
-    func MultiCacheGenerator(){
-        for (key,object) in cache{
+
+    func MultiCacheGenerator() {
+        for (key, object) in cache {
             print("key:\(key),object:\(object)")
         }
     }
-    
-    func getObjectTest(){
-        if let object = cache.object(forKey: "shirley1"){
+
+    func getObjectTest() {
+        if let object = cache.object(forKey: "shirley1") {
             print("当前Student是:\(object)")
         }
-    
-        cache.object(forKey: "shirley2") { (key, value) in
-            if let object = value{
+
+        cache.object(forKey: "shirley2") { (_, value) in
+            if let object = value {
                 print("当前Student是:\(object)")
             }
         }
-    
+
         let object1 = cache.object(forKey: "shirley30")
-        print("有没有这个stundent:\(object1)")
-    
-        cache.object(forKey: "shirley20") { (key, value) in
-            print("有没有这个stundent1:\(value)")
+        print("有没有这个stundent:\(String(describing: object1))")
+
+        cache.object(forKey: "shirley20") { (_, value) in
+            print("有没有这个stundent1:\(String(describing: value))")
         }
     }
-    
-    func isExistsObjectForKeyTest(){
+
+    func isExistsObjectForKeyTest() {
         let fin = cache.isExistsObjectForKey(forKey: "shirley20")
         print("是否存在key对应的value:\(fin)")
-    
+
         cache.isExistsObjectForKey(forKey: "shirley10") { (key, fin) in
             print("是否存在key\(key)对应的value:\(fin)")
         }
     }
-    
-    func removeObject(){
+
+    func removeObject() {
         cache.removeObject(forKey: "shirley20")
         cache.removeObject(forKey: "shirley2") {
             print("")
         }
     }
-    
-    func removeAll(){
+
+    func removeAll() {
         cache.removeAll()
         cache.removeAll {
             print("")
         }
     }
-    
+
     /**
     MemoryCache测试用例
     */
-    
-    func memoryCacheGenerator(){
-            
+
+    func memoryCacheGenerator() {
+
         let flatMapResult = memoryCache.compactMap { $0 }
         print("flatMapResult:\(flatMapResult)")
-            
-        let filterResult = memoryCache.filter { (key,object) -> Bool in
+
+        let filterResult = memoryCache.filter { (key, _) -> Bool in
             return key == "shirley2"
         }
         print(filterResult)
-            
+
         memoryCache.forEach { print($0)}
-            
+
         let values = memoryCache.map { return $0 }
         print(values)
 
-        for (key,object) in memoryCache {
+        for (key, object) in memoryCache {
             print("key1:\(key),object1:\(object)")
         }
     }
 
-    func memorySetObjectTest(){
+    func memorySetObjectTest() {
         let shirley = Student(name: "shirley", age: 50)
         /**
         返回值也可以不需要
         */
-        let fin = memoryCache.set(forKey: "shirley19", value: shirley,cost: 0)
+        let fin = memoryCache.set(forKey: "shirley19", value: shirley, cost: 0)
         print("当前数据缓存是否成功(fin为Bool类型):\(fin)")
         /*
         cost:缓存对象大小(字节为单位)
@@ -207,26 +221,26 @@ class ViewController: UIViewController {
         }
     }
 
-    func memoryGetObjectTest(){
-        if let object = memoryCache.object(forKey: "shirley1"){
+    func memoryGetObjectTest() {
+        if let object = memoryCache.object(forKey: "shirley1") {
             print("当前Student是:\(object)")
         }
 
-        memoryCache.object(forKey: "shirley2") { (key, value) in
-            if let object = value{
+        memoryCache.object(forKey: "shirley2") { (_, value) in
+            if let object = value {
                 print("当前Student是:\(object)")
             }
         }
 
         let object1 = memoryCache.object(forKey: "shirley30")
-        print("有没有这个stundent:\(object1)")
+        print("有没有这个stundent:\(String(describing: object1))")
 
-        memoryCache.object(forKey: "shirley20") { (key, value) in
-            print("有没有这个stundent1:\(value)")
+        memoryCache.object(forKey: "shirley20") { (_, value) in
+            print("有没有这个stundent1:\(String(describing: value))")
         }
     }
 
-    func memoryIsExistsObjectForKeyTest(){
+    func memoryIsExistsObjectForKeyTest() {
         let fin = memoryCache.isExistsObjectForKey(forKey: "shirley2")
         print("是否存在key对应的value:\(fin)")
 
@@ -235,7 +249,7 @@ class ViewController: UIViewController {
         }
     }
 
-    func memoryRemoveObject(){
+    func memoryRemoveObject() {
         memoryCache.removeObject(forKey: "shirley20")
         memoryCache.removeObject(forKey: "shirley2") {
             print("")
@@ -243,43 +257,42 @@ class ViewController: UIViewController {
 
     }
 
-    func memoryRemoveAll(){
+    func memoryRemoveAll() {
         memoryCache.removeAll()
         memoryCache.removeAll {
             print("")
         }
     }
-    
-    
+
     /**
     DiskCache
      */
-    func diskCacheGenerator(){
-        
+    func diskCacheGenerator() {
+
         let flatMapResult = diskCache.compactMap { $0 }
         print("flatMapResult:\(flatMapResult)")
-        
-        let filterResult = diskCache.filter { (key,object) -> Bool in
+
+        let filterResult = diskCache.filter { (key, _) -> Bool in
             return key == "shirley222"
          }
         print(filterResult)
-        
+
         diskCache.forEach { print($0)}
-        
+
         let values = diskCache.map { return $0 }
         print(values)
-        
-        for (key,object) in diskCache {
+
+        for (key, object) in diskCache {
                 print("key1:\(key),object1:\(object)")
         }
     }
-    
-    func  diskCacheSetObjectTest(){
+
+    func  diskCacheSetObjectTest() {
             let shirley = Student(name: "shirley", age: 50)
             /**
             返回值也可以不需要
             */
-            let fin = diskCache.set(forKey: "shirley19", value: shirley,cost: 5)
+            let fin = diskCache.set(forKey: "shirley19", value: shirley, cost: 5)
             print("当前数据缓存是否成功(fin为Bool类型):\(fin)")
             /*
             cost:缓存对象大小(字节为单位)
@@ -302,27 +315,27 @@ class ViewController: UIViewController {
                 print("当前缓存对象对应的key:\(key),当前数据缓存是否成功(fin为Bool类型):\(fin)")
             }
         }
-            
-    func diskCacheGetObjectTest(){
-        if let object = diskCache.object(forKey: "shirley1"){
+
+    func diskCacheGetObjectTest() {
+        if let object = diskCache.object(forKey: "shirley1") {
             print("当前Student是:\(object)")
         }
-    
-        diskCache.object(forKey: "shirley2") { (key, value) in
-            if let object = value{
+
+        diskCache.object(forKey: "shirley2") { (_, value) in
+            if let object = value {
                 print("当前Student是:\(object)")
             }
         }
-    
+
         let object1 = diskCache.object(forKey: "shirley30")
-        print("有没有这个stundent:\(object1)")
-    
-        diskCache.object(forKey: "shirley19") { (key, value) in
-            print("有没有这个stundent1:\(value)")
+        print("有没有这个stundent:\(String(describing: object1))")
+
+        diskCache.object(forKey: "shirley19") { (_, value) in
+            print("有没有这个stundent1:\(String(describing: value))")
         }
     }
-        
-    func diskCacheIsExistsObjectForKeyTest(){
+
+    func diskCacheIsExistsObjectForKeyTest() {
         let fin = diskCache.isExistsObjectForKey(forKey: "shirley2")
         print("是否存在key对应的value:\(fin)")
 
@@ -330,19 +343,19 @@ class ViewController: UIViewController {
             print("是否存在key\(key)对应的value:\(fin)")
         }
     }
-        
-    func diskCacheRemoveObject(){
+
+    func diskCacheRemoveObject() {
         diskCache.removeObject(forKey: "shirley20")
         diskCache.removeObject(forKey: "shirley2") {
             print("")
         }
     }
-        
-    func diskCacheRemoveAll(){
+
+    func diskCacheRemoveAll() {
         diskCache.removeAll()
         diskCache.removeAll {
             print("")
         }
     }
+ */
 }
-
